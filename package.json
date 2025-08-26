@@ -24,7 +24,7 @@
 	"author": "sxbrsky",
 	"license": "MIT",
 	"dependencies": {
-		"amqplib": "^0.10.5"
+		"amqplib": "^0.10.9"
 	},
 	"devDependencies": {
 		"standard": "^17.1.2"
