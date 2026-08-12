@@ -1,30 +1,37 @@
 {
-	"name": "@sxbrsky/dispatcher",
-	"version": "2.0.0",
+	"name": "@slpxxv/rabbit-relay-rpc",
+	"version": "3.0.0",
 	"description": "A package for creating communication between microservices based on RabbitMQ.",
 	"main": "src/index.js",
+	"exports": "./src/index.js",
+	"files": [
+		"src"
+	],
 	"engines": {
-		"node": ">=18.12.0"
+		"node": ">=22.0.0"
 	},
 	"scripts": {
-		"lint": "standard src/**/*.js --fix",
-		"prepare": "npm run lint",
+		"lint": "standard src test",
+		"lint:fix": "standard src test --fix",
+		"test": "node --test",
+		"check": "npm run lint && npm test",
 		"postversion": "git push && git push --tags"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/sxbrsky/node-dispatcher.git"
+		"url": "git+https://github.com/slpxxv/rabbit-relay-rpc.git"
 	},
 	"keywords": [
 		"amqp",
 		"events",
 		"rpc",
-		"dispatcher"
+		"dispatcher",
+		"rabbitmq"
 	],
-	"author": "sxbrsky",
+	"author": "slpxxv",
 	"license": "MIT",
 	"dependencies": {
-		"amqplib": "^0.10.5"
+		"amqplib": "^0.10.9"
 	},
 	"devDependencies": {
 		"standard": "^17.1.2"

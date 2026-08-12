@@ -1,30 +1,92 @@
-# Dispatcher
-A package for creating communication between microservices based on RabbitMQ.
+# Rabbit Relay RPC
 
-## Usage
-    (async () => {
-        const rpc = await require('./src')('amqp://localhost')
+A small promise-based RPC layer for Node.js services communicating through RabbitMQ. Provides a simple request-response API with minimal boilerplate.
 
-        rpc.register('hello', user => `Hello ${user}`);
-        rpc.start();
+## Requirements
 
-        rpc.call('hello', 'john).then(response => {
-            console.log(response);
-        });
-    })().catch(e => console.log(e))
+- Node.js 22 or newer
+- RabbitMQ
 
-## Api reference
-    async call(handler: string, ...args: any[]) => Promise<any>
-Emit new request
+## Installation
 
-    register (event: string, callback: (...args: any[]) => any) => void
-Register new callback
+```sh
+npm install @slpxxv/rabbit-relay-rpc
+```
 
-    async start() => Promise<void>
-Start listen for new requests. Use this after register events.
+## Quick start
+
+```js
+const createDispatcher = require('@slpxxv/rabbit-relay-rpc')
+
+async function main () {
+  const rpc = await createDispatcher('amqp://localhost', {
+    commandQueue: 'commands',
+    timeoutMs: 10_000,
+    prefetch: 20
+  })
+
+  rpc.register('greet', user => `Hello ${user}`)
+  await rpc.start()
+
+  const greeting = await rpc.call('greet', 'John')
+  console.log(greeting)
+
+  await rpc.close()
+}
+
+main().catch(error => {
+  console.error(error)
+  process.exitCode = 1
+})
+```
+
+Register handlers before calling `start()`. A dispatcher can act as both a client and
+a server, or only use the methods needed by a service. Handler return values are JSON
+serialized and remote handler failures reject the corresponding `call()` promise.
+
+## API
+
+### `createDispatcher(url[, options])`
+
+Connects to RabbitMQ and returns a dispatcher. Supported options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `commandQueue` | `commands` | Queue used for RPC requests |
+| `timeoutMs` | `60000` | Maximum time to wait for a response |
+| `prefetch` | unset | Maximum unacknowledged requests per consumer |
+
+### `register(name, handler)`
+
+Registers a synchronous or asynchronous handler under a non-empty name.
+
+### `start()`
+
+Starts consuming requests. Repeated calls are safe and do not create extra consumers.
+
+### `call(name, ...args)`
+
+Calls a remote handler and resolves with its deserialized return value. It rejects on
+timeouts, malformed responses, unknown handlers, and errors thrown by handlers.
+
+### `close()`
+
+Closes both channels and the RabbitMQ connection. Pending calls are rejected.
+
+## Development
+
+```sh
+npm install
+npm run check
+```
+
+The project uses Node.js' built-in test runner and JavaScript Standard Style.
 
 ## Versioning
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/macotsuu/dispatcher/tags). 
+
+Releases follow [Semantic Versioning](https://semver.org/). Available versions are
+listed in the repository's [tags](https://github.com/slpxxv/rabbit-relay-rpc/tags).
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+Licensed under the [MIT License](LICENSE.md).
