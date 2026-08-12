@@ -1,70 +1,44 @@
-name: Continuous Integration
+name: CI
 
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
   push:
     branches:
       - master
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
-    name: Lint code
+  check:
+    name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v1
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      - name: Lint
-        run: npm run lint
-  build:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        node-version:
+          - 22
+          - 24
 
-    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-      - id: npm-cache
-        if: runner.os == 'Linux'
-        name: Get npm cache directory
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - if: runner.os == 'Linux'
-        name: Cache npm dependencies
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-${{ matrix.node-version }}-
-      - name: Update npm
-        run: npm install --global npm
+          cache: npm
+
       - name: Install dependencies
-        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+        run: npm ci --ignore-scripts
+
+      - name: Run quality checks
+        run: npm run check
+
+      - name: Verify package contents
+        run: npm pack --dry-run

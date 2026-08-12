@@ -1,7 +1,7 @@
 {
 	"name": "@slpxxv/rabbit-relay-rpc",
 	"version": "3.0.0",
-	"description": "A package for creating communication between microservices based on RabbitMQ.",
+	"description": "A small promise-based RPC layer for Node.js services communicating through RabbitMQ.",
 	"main": "src/index.js",
 	"exports": "./src/index.js",
 	"files": [
@@ -20,6 +20,11 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/slpxxv/rabbit-relay-rpc.git"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": false,
+		"registry": "https://registry.npmjs.org"
 	},
 	"keywords": [
 		"amqp",

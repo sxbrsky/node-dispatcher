@@ -82,6 +82,12 @@ npm run check
 
 The project uses Node.js' built-in test runner and JavaScript Standard Style.
 
+## Publishing
+
+Publishing is handled by GitHub Actions when a non-prerelease GitHub Release is
+published. The release tag must match the version in `package.json`, for example
+`v3.0.0`.
+
 ## Versioning
 
 Releases follow [Semantic Versioning](https://semver.org/). Available versions are
